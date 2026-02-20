@@ -1,8 +1,10 @@
-
-
-.env
 node_modules/
-android/app/build/
+
 android/build/
+android/app/build/
+android/app/.cxx/
+android/.cxx/
+
 *.apk
 *.aab
+.env
