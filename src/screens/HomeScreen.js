@@ -1,39 +1,86 @@
 import React, { useEffect, useState } from "react";
-import { View, Button, Text, StyleSheet } from "react-native";
-import {
-  initLocationTracking,
-  startTracking,
-  stopTracking,
-  destroyTracking
-} from "../services/locationService";
+import { View, Button, Text, StyleSheet, PermissionsAndroid, Platform } from "react-native";
+
+import { initLocationTracking, startTracking, stopTracking, destroyTracking, sendImmediateLocation } from "../services/locationService";
+
 import { removeToken } from "../auth/authStorage";
 
 export default function HomeScreen({ navigation }) {
 
   const [tracking, setTracking] = useState(false);
 
+
+
+  const requestLocationPermission = async () => {
+
+    if (Platform.OS === "android") {
+
+      try {
+
+        const granted = await PermissionsAndroid.requestMultiple([
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+          PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION,
+          PermissionsAndroid.PERMISSIONS.ACCESS_BACKGROUND_LOCATION,
+        ]);
+
+        if (
+          granted["android.permission.ACCESS_FINE_LOCATION"] === "granted"
+        ) {
+
+          console.log("✅ Location permission granted");
+
+          // ⭐ START BACKGROUND TRACKING
+          initLocationTracking();
+          sendImmediateLocation();
+
+        } else {
+
+          console.log("❌ Location permission denied");
+        }
+
+      } catch (err) {
+        console.warn(err);
+      }
+
+    }
+  };
+
+
+
   useEffect(() => {
-    initLocationTracking();
+
+    requestLocationPermission();
+
   }, []);
 
-  const toggleTracking = () => {
+
+
+  const toggleTracking = async () => {
 
     if (tracking) {
-      stopTracking();
+
+      await stopTracking();
+      console.log("🛑 Tracking stopped");
+
     } else {
-      startTracking();
+
+      await startTracking();
+      console.log("🚀 Tracking started");
+
     }
 
     setTracking(!tracking);
   };
 
+
   const logout = async () => {
 
-    destroyTracking(); // avoid privacy disaster
+    await destroyTracking(); // VERY IMPORTANT
     await removeToken();
 
     navigation.replace("Login");
   };
+
 
   return (
     <View style={styles.container}>

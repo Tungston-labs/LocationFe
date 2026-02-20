@@ -1,0 +1,15 @@
+D:/LocationApp/mobile/android/app/.cxx/Debug/d1d221i3/x86_64/CMakeFiles/appmodules.dir
+D:/LocationApp/mobile/android/app/.cxx/Debug/d1d221i3/x86_64/CMakeFiles/edit_cache.dir
+D:/LocationApp/mobile/android/app/.cxx/Debug/d1d221i3/x86_64/CMakeFiles/rebuild_cache.dir
+D:/LocationApp/mobile/android/app/.cxx/Debug/d1d221i3/x86_64/rnasyncstorage_autolinked_build/CMakeFiles/react_codegen_rnasyncstorage.dir
+D:/LocationApp/mobile/android/app/.cxx/Debug/d1d221i3/x86_64/rnasyncstorage_autolinked_build/CMakeFiles/edit_cache.dir
+D:/LocationApp/mobile/android/app/.cxx/Debug/d1d221i3/x86_64/rnasyncstorage_autolinked_build/CMakeFiles/rebuild_cache.dir
+D:/LocationApp/mobile/android/app/.cxx/Debug/d1d221i3/x86_64/rngesturehandler_codegen_autolinked_build/CMakeFiles/react_codegen_rngesturehandler_codegen.dir
+D:/LocationApp/mobile/android/app/.cxx/Debug/d1d221i3/x86_64/rngesturehandler_codegen_autolinked_build/CMakeFiles/edit_cache.dir
+D:/LocationApp/mobile/android/app/.cxx/Debug/d1d221i3/x86_64/rngesturehandler_codegen_autolinked_build/CMakeFiles/rebuild_cache.dir
+D:/LocationApp/mobile/android/app/.cxx/Debug/d1d221i3/x86_64/safeareacontext_autolinked_build/CMakeFiles/react_codegen_safeareacontext.dir
+D:/LocationApp/mobile/android/app/.cxx/Debug/d1d221i3/x86_64/safeareacontext_autolinked_build/CMakeFiles/edit_cache.dir
+D:/LocationApp/mobile/android/app/.cxx/Debug/d1d221i3/x86_64/safeareacontext_autolinked_build/CMakeFiles/rebuild_cache.dir
+D:/LocationApp/mobile/android/app/.cxx/Debug/d1d221i3/x86_64/rnscreens_autolinked_build/CMakeFiles/react_codegen_rnscreens.dir
+D:/LocationApp/mobile/android/app/.cxx/Debug/d1d221i3/x86_64/rnscreens_autolinked_build/CMakeFiles/edit_cache.dir
+D:/LocationApp/mobile/android/app/.cxx/Debug/d1d221i3/x86_64/rnscreens_autolinked_build/CMakeFiles/rebuild_cache.dir

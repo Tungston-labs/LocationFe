@@ -1,93 +1,169 @@
-import BackgroundGeolocation from "react-native-background-geolocation";
+import BackgroundFetch from "react-native-background-fetch";
+import Geolocation from "react-native-geolocation-service";
+import ReactNativeForegroundService from "@supersami/rn-foreground-service";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export const initLocationTracking = async () => {
+const API_URL = "http://178.248.112.16:5005/api/location";
 
-  const token = await AsyncStorage.getItem("token");
-  console.log("🔹 TRACKING TOKEN:", token);
+// FOREGROUND SERVICE (only when fetching)
 
-  BackgroundGeolocation.ready({
 
-    // 🔥 Better accuracy
-    desiredAccuracy: BackgroundGeolocation.DESIRED_ACCURACY_HIGH,
+const startForegroundService = async () => {
+  await ReactNativeForegroundService.start({
+    id: 1001,
+    title: "Location Tracking",
+    message: "Fetching your location...",
 
-    // ⭐ CHANGE THIS (50 is too large for office)
-    distanceFilter: 10,
+    icon: "ic_launcher",
+    ServiceType: "location",
+  });
+};
 
-    // 🔥 Allow plugin to stop when user is still
-    stopTimeout: 5, // stops GPS after 5 minutes of no movement
+const stopForegroundService = async () => {
+  await ReactNativeForegroundService.stop();
+};
 
-    // 🔥 Prevent Android killing the service
-    stopOnTerminate: false,
-    startOnBoot: true,
-    foregroundService: true,
-    enableHeadless: true,
 
-    // ⭐⭐⭐ VERY IMPORTANT
-     preventSuspend: true,
-    // heartbeatInterval: 60,        // wakes app every 60 sec
-    // disableStopDetection: true,   // don't sleep when user stops
+// GET GPS LOCATION
 
-    // Server
-    url: "http://178.248.112.16:5005/api/location",
 
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+const getLocation = () => {
+  return new Promise((resolve, reject) => {
 
-    autoSync: true,
-    batchSync: false,
-
-    //debug: true,  👉 turn OFF in production
-    debug: false,
-
-    notification: {
-      title: "Tracking Active",
-      text: "Location tracking is running",
-    },
-
-  }).then((state) => {
-
-    console.log("✅ BG Geo Ready:", state.enabled);
-
-    // 🔥 Location listener
-    BackgroundGeolocation.onLocation(location => {
-      console.log("📍 LOCATION:", location);
-    });
-
-    // ⭐ VERY POWERFUL — ensures updates even if not moving
-    // BackgroundGeolocation.onHeartbeat(() => {
-    //   BackgroundGeolocation.getCurrentPosition({
-    //     samples: 1,
-    //     persist: true
-    //   });
-    // });
-
-    // ⭐ Confirm server received location
-    BackgroundGeolocation.onHttp(response => {
-      console.log("📡 HTTP STATUS:", response.status);
-    });
-
-    // 🔥 MUST START (many developers forget this)
-    if (!state.enabled) {
-      BackgroundGeolocation.start();
-    }
-BackgroundGeolocation.getCurrentPosition({
-      samples: 1,
-      persist: true
-    });
+    Geolocation.getCurrentPosition(
+      position => resolve(position),
+      error => reject(error),
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 10000,
+        forceRequestLocation: true,
+      }
+    );
 
   });
 };
 
-export const startTracking = () => {
-  BackgroundGeolocation.start();
+
+// SEND TO SERVER
+
+
+const sendLocationToServer = async (coords) => {
+
+  const token = await AsyncStorage.getItem("token");
+
+  try {
+
+    await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+      }),
+    });
+
+    console.log("✅ Location sent to server");
+
+  } catch (err) {
+    console.log("❌ Failed to send location:", err);
+  }
 };
 
-export const stopTracking = () => {
-  BackgroundGeolocation.stop();
+
+// BACKGROUND FETCH (THE BRAIN)
+
+
+export const initLocationTracking = async () => {
+
+  BackgroundFetch.configure(
+    {
+      minimumFetchInterval: 15, // 🔥 every ~15-25 minutes
+      stopOnTerminate: false,
+      startOnBoot: true,
+      enableHeadless: true,
+      requiredNetworkType: BackgroundFetch.NETWORK_TYPE_ANY,
+      forceAlarmManager: true,
+      requiresBatteryNotLow: false,
+      requiresCharging: false,
+      requiresDeviceIdle: false,
+    },
+
+    async (taskId) => {
+
+      console.log("🔥 Background fetch triggered");
+
+      try {
+
+        await startForegroundService();
+
+        const position = await getLocation();
+
+        await sendLocationToServer(position.coords);
+
+      } catch (err) {
+
+        console.log("LOCATION ERROR:", err);
+
+      }
+
+      await stopForegroundService();
+
+      BackgroundFetch.finish(taskId);
+    },
+
+    (error) => {
+      console.log("BackgroundFetch failed:", error);
+    }
+  );
+
+  BackgroundFetch.start();
+
+  console.log("✅ Background tracking initialized");
 };
 
-export const destroyTracking = () => {
-  BackgroundGeolocation.stop();
+
+// OPTIONAL MANUAL START / STOP
+
+
+export const startTracking = async () => {
+
+  await ReactNativeForegroundService.start({
+    id: 1001,
+    title: "Location Tracking",
+    message: "Tracking your location...",
+    icon: "ic_launcher",
+    ServiceType: "location",
+  });
+
+  await BackgroundFetch.start();
+};
+
+export const stopTracking = async () => {
+
+  await BackgroundFetch.stop();
+  await ReactNativeForegroundService.stop();
+};
+
+export const destroyTracking = async () => {
+  await BackgroundFetch.stop();
+};
+
+export const sendImmediateLocation = async () => {
+
+  try {
+
+    const position = await getLocation();
+
+    await sendLocationToServer(position.coords);
+
+    console.log("✅ Immediate location sent");
+
+  } catch (err) {
+
+    console.log("❌ Immediate location error:", err);
+  }
 };
